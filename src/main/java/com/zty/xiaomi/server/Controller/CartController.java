@@ -9,6 +9,7 @@ import com.zty.xiaomi.server.utils.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @CrossOrigin
@@ -29,7 +30,7 @@ public class CartController {
      * @return CartResult:购物车结果
      */
     @PostMapping("/push")
-    public CartResult putShop(@RequestBody pushCart pushcart) throws IOException {
+    public CartResult putShop(@RequestBody pushCart pushcart, HttpSession session) throws IOException {
         CartResult cartResult = new CartResult();
         // 进行token验证，设置为2h过期
         boolean success = TokenUtil.verify(pushcart.getToken());
@@ -72,6 +73,11 @@ public class CartController {
             cartResult.setData(cartProductVoList);
             cartResult.setImageHost("www.mi.com");
             cartResult.setSelectedAll(selectedAll);
+
+            // 向session中放入商品列表，用户对象，购物车结果(包含数量与总价格)
+            session.setAttribute("productList",cartProductVoList);
+            session.setAttribute("user",user);
+            session.setAttribute("cartResult",cartResult);
         } else {
             cartResult.setStatus(10);
         }

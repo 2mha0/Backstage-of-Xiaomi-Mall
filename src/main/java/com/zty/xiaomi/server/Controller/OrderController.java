@@ -1,7 +1,6 @@
 package com.zty.xiaomi.server.Controller;
 
 
-
 import com.zty.xiaomi.server.Entity.Order.*;
 import com.zty.xiaomi.server.Entity.User;
 import com.zty.xiaomi.server.Service.AlipayService;
@@ -50,7 +49,7 @@ public class OrderController {
         OrderResult orderResult = new OrderResult();
         orderResult.setStatus(0);
         OrderList orderList = orderServiceImp.creatOrder(ordCreaParm);
-        if(orderList.getOrderNo() == 0){
+        if (orderList.getOrderNo() == 0) {
             orderResult.setStatus(1);
             return orderResult;
         }
@@ -67,7 +66,7 @@ public class OrderController {
 
         List<UserOrdList> orderList = orderServiceImp.getOrderList(userid);
 
-        for(UserOrdList userOrdList:orderList){
+        for (UserOrdList userOrdList : orderList) {
             int orderNo = userOrdList.getOrderNo();
             List<UserOrdItemList> orderListItems = orderServiceImp.getOrderListItems(orderNo);
             userOrdList.setItems(orderListItems);
@@ -81,11 +80,9 @@ public class OrderController {
 
     }
 
-
-
     //下单成功后调用下面两个方法
     @RequestMapping("/getorder")
-    public OrdFinaResult getOrder(@RequestParam("id") int id) throws IOException{
+    public OrdFinaResult getOrder(@RequestParam("id") int id) throws IOException {
         OrdFinaResult orderResult = new OrdFinaResult();
         orderResult.setStatus(0);
         OrdFina orderList = orderServiceImp.getOrderById(id);
@@ -95,7 +92,7 @@ public class OrderController {
 
 
     @RequestMapping("/getorderdetail")
-    public OrdFinaResult getOrderDetail(@RequestParam("username") String username) throws IOException{
+    public OrdFinaResult getOrderDetail(@RequestParam("username") String username) throws IOException {
         User user = regLogServiceImp.getUserByUserName(username);
         String userid = user.getUserid();
         List<orderItemVoList> orderItems = orderServiceImp.getOrderItems(userid);
@@ -107,14 +104,31 @@ public class OrderController {
 
     @RequestMapping("/buy")
     public void buyOrder(@RequestParam("id") int id,
-                         @RequestParam("name") String username){
-        orderServiceImp.buyOrder(id,username);
+                         @RequestParam("name") String username) {
+        orderServiceImp.buyOrder(id, username);
 
     }
+//
+//    @RequestMapping("/page")
+//    public String butrue(@RequestBody OrdPayParm ordPayParm) throws Exception {
+//
+//        return alipayService.toPayPage(ordPayParm.getSubject(), ordPayParm.getOrderId(), ordPayParm.getTotal());
+//    }
 
-    @RequestMapping("/page")
-    public String butrue(@RequestBody OrdPayParm ordPayParm) throws Exception {
-
-        return alipayService.toPayPage(ordPayParm.getSubject(), ordPayParm.getOrderId(), ordPayParm.getTotal());
+    @PostMapping("/pay")
+    public HashMap<String, Object> payOrder(@RequestParam(value = "orderNo") Integer orderNo) {
+        boolean isPay = orderServiceImp.payOrder(orderNo);
+        HashMap<String, Object> result = new HashMap<>();
+        if (isPay) {
+            result.put("code", 200);
+            result.put("data", isPay);
+            result.put("message", "支付成功");
+            return result;
+        } else {
+            result.put("code", 500);
+            result.put("data", isPay);
+            result.put("message", "支付失败");
+            return result;
+        }
     }
 }

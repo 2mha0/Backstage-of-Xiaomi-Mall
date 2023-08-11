@@ -43,7 +43,7 @@ public class OrderServiceImp implements OrderService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.DEFAULT,timeout=36000,rollbackFor=Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 36000, rollbackFor = Exception.class)
     public OrderList creatOrder(OrdCreaParm ordCreaParm) throws Exception {
         OrderList orderList = new OrderList();
         User user = regLogServiceImp.getUserByUserName(ordCreaParm.getName());
@@ -52,7 +52,7 @@ public class OrderServiceImp implements OrderService {
         int orderNumber = OrderNumUtil.getOrderNumber();
         String createTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
-        int payment=0;
+        int payment = 0;
         List<cartProduct> cartproducts = cartServiceImp.getCartProduct(userid).getList();
 
         /*
@@ -60,15 +60,15 @@ public class OrderServiceImp implements OrderService {
          */
         try {
 
-            for(cartProduct cartProductvo : cartproducts){
+            for (cartProduct cartProductvo : cartproducts) {
                 int count = cartProductvo.getCount();
                 int goodid = cartProductvo.getGood_id();
                 int prodStock = ordermapper.getProdStock(goodid);
                 int sellcount = ordermapper.getProdSellCount(goodid);
                 //乐观锁防止高并发超卖,超卖则返回0并抛出异常，正常售出返回1
-                int succ = ordermapper.chanProdStock(goodid,prodStock,prodStock-count);
-                ordermapper.addSellCount(goodid,sellcount+count);
-                if(succ == 0){
+                int succ = ordermapper.chanProdStock(goodid, prodStock, prodStock - count);
+                ordermapper.addSellCount(goodid, sellcount + count);
+                if (succ == 0) {
                     throw new Exception();
                 }
             }
@@ -103,13 +103,15 @@ public class OrderServiceImp implements OrderService {
             }
             Thread thread = new Thread(new OrderCancel(), "取消订单监听线程");
             thread.start();
-
+            Addre addre = getAdd(userid, ordCreaParm.getShippingId());
+            if (addre == null) {
+                throw new RuntimeException("addre为空");
+            }
             ordermapper.insOrder(userid, orderNumber, payment, 1, "在线支付", 0, 10, "未支付",
-                    "", "", createTime.trim(), "www.mi.com", ordCreaParm.getShippingId(), getAdd(userid, ordCreaParm.getShippingId()).getReceiverName(),
-                    getAdd(userid, ordCreaParm.getShippingId()).getReceiverMobile(), getAdd(userid, ordCreaParm.getShippingId()).getReceiverProvince(),
-                    getAdd(userid, ordCreaParm.getShippingId()).getReceiverCity(), getAdd(userid, ordCreaParm.getShippingId()).getReceiverAddress(),
-                    getAdd(userid, ordCreaParm.getShippingId()).getReceiverZip());
-
+                    "", "", createTime.trim(), "www.mi.com", ordCreaParm.getShippingId(), addre.getReceiverName(),
+                    addre.getReceiverMobile(), addre.getReceiverProvince(),
+                    addre.getReceiverCity(), addre.getReceiverAddress(),
+                    addre.getReceiverZip());
 
             for (cartProduct cartProduct : cartproducts) {
                 String orderImg = ordermapper.getOrderImg(cartProduct.getGood_id());
@@ -117,9 +119,9 @@ public class OrderServiceImp implements OrderService {
                         cartProduct.getCount(), cartProduct.getProductTotalPrice(), 10, orderImg);
             }
             goodCart.delGoodByname(userid);
-        }catch (Exception e){
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-
+            throw new RuntimeException("创建订单失败");
         }
         return orderList;
     }
@@ -130,19 +132,19 @@ public class OrderServiceImp implements OrderService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.DEFAULT,timeout=36000,rollbackFor=Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 36000, rollbackFor = Exception.class)
     public void delOrder(int orderid) {
         try {
             ordermapper.delOrde(orderid);
             List<UserOrdItemList> ordItems = ordermapper.getOrdItems(orderid);
-            for(UserOrdItemList userOrdItemList:ordItems){
+            for (UserOrdItemList userOrdItemList : ordItems) {
                 int productId = userOrdItemList.getProductId();
                 int quantity = userOrdItemList.getQuantity();
                 CartGoodInsert goodByidinsert = goodCart.getGoodByidinsert(productId);
                 int productStock = goodByidinsert.getProductStock();
                 int sellcount = goodByidinsert.getSellcount();
-                ordermapper.rollbackStock(productId,productStock+quantity);
-                ordermapper.rollbackSellCount(productId,sellcount+quantity);
+                ordermapper.rollbackStock(productId, productStock + quantity);
+                ordermapper.rollbackSellCount(productId, sellcount + quantity);
             }
             ordermapper.delOrder(orderid);
         } catch (Exception e) {
@@ -184,7 +186,7 @@ public class OrderServiceImp implements OrderService {
     直接支付
      */
     @Override
-    public void buyOrder(int id,String username) {
+    public void buyOrder(int id, String username) {
         ordermapper.buyOrder(id);
         User userByUserName = regLogServiceImp.getUserByUserName(username);
         String userid = userByUserName.getUserid();
@@ -194,5 +196,10 @@ public class OrderServiceImp implements OrderService {
         if (!keys.isEmpty()) {
             stringRedisTemplate.delete(keys);
         }
+    }
+
+    public boolean payOrder(int orderNo) {
+        boolean isPay = ordermapper.payOrder(orderNo);
+        return isPay;
     }
 }

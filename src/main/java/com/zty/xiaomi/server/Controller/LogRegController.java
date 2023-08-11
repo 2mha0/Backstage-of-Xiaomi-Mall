@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -65,10 +66,11 @@ public class LogRegController {
     }
 
 
-//登录验证
+    // 登录验证
     @RequestMapping("/UserLogin")
     public LoginResult Login(@RequestParam("username") String username,
-                             @RequestParam("password") String password) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+                             @RequestParam("password") String password,
+                             HttpSession session) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         User user = regLogServiceImp.getUserByUserName(username);
         LoginResult result = new LoginResult();
         LoginData loginData = new LoginData();
@@ -83,6 +85,8 @@ public class LogRegController {
                 loginData.setToken(token);
                 result.setMsg("登录成功");
                 result.setData(loginData);
+                // 向session中添加user对象，以便拦截器可以接收此对象
+                session.setAttribute("user",user);
             }
             else {
                 result.setStatus(2007);

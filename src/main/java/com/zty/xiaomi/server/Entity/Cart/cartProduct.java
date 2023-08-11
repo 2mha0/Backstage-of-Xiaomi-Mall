@@ -14,4 +14,11 @@ public class cartProduct {
     private int productStock;
     private boolean productSelected;
 
+    public String printCartProduct() {
+        return "cartProduct{" +
+                "good_id=" + good_id +
+                ", count=" + count +
+                ", goods_name='" + goods_name + '\'' +
+                '}';
+    }
 }

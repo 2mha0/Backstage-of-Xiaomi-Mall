@@ -28,7 +28,5 @@ public interface OrderService {
     void buyOrder(int id,String username);
 
 
-
-
-
+    boolean payOrder(int orderNo);
 }
