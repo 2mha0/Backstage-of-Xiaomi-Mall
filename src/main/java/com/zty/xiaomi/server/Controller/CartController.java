@@ -45,6 +45,8 @@ public class CartController {
                 int goodCount = 1;
                 CartGoodInsert goodByidinsert = goodServiceImp.getGoodByidinsert(pushcart.getProductId());
 
+                System.out.println(pushcart.getProductId());
+
                 goodServiceImp.insCartGood(userid, pushcart.getProductId(), goodByidinsert.getName(),
                         goodByidinsert.getPrice(), goodCount, goodByidinsert.getSubtitle(), goodByidinsert.getProductStock(),
                         goodByidinsert.getStatus(), true);

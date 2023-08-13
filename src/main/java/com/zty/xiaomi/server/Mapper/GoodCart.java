@@ -51,4 +51,6 @@ public interface GoodCart {
             "productTotalPrice,productStock,productSelected from cart where user_id like #{userid}")
     List<cartProduct> getcartProduct(String userid);
 
+    @Select("select id from cart where user_id = #{userid}")
+    List<Integer> getCartIds(String userid);
 }

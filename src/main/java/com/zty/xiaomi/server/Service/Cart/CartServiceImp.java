@@ -1,6 +1,5 @@
 package com.zty.xiaomi.server.Service.Cart;
 
-import ch.qos.logback.classic.Logger;
 import com.zty.xiaomi.server.Entity.Cart.cartProduct;
 import com.zty.xiaomi.server.Entity.Cart.cartProductVoList;
 import com.zty.xiaomi.server.Mapper.GoodCart;
@@ -26,5 +25,11 @@ public class CartServiceImp implements CartService{
         }
         cartProductVoList.setList(cartProducts);
         return cartProductVoList;
+    }
+
+    @Override
+    public List<Integer> getCartIds(String userid) {
+        List<Integer> ids = goodCartmapper.getCartIds(userid);
+        return ids;
     }
 }

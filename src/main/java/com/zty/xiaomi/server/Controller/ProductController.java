@@ -26,7 +26,7 @@ public class ProductController {
         ProductInfo productInfo = prodServiceImp.getProductInfo(id);
         productResult.setData(productInfo);
         // 将商品信息注入到session中
-        productInfo.setProductId(String.valueOf(id));
+        productInfo.setProductId(id);
         session.setAttribute("product",productInfo);
         return productResult;
     }

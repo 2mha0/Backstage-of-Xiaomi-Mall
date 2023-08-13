@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.IOException;
@@ -115,14 +116,15 @@ public class OrderController {
 //        return alipayService.toPayPage(ordPayParm.getSubject(), ordPayParm.getOrderId(), ordPayParm.getTotal());
 //    }
 
-    @PostMapping("/pay")
-    public HashMap<String, Object> payOrder(@RequestParam(value = "orderNo") Integer orderNo) {
+    @GetMapping("/pay")
+    public HashMap<String, Object> payOrder(@RequestParam(value = "orderNo") Integer orderNo, HttpSession session) {
         boolean isPay = orderServiceImp.payOrder(orderNo);
         HashMap<String, Object> result = new HashMap<>();
         if (isPay) {
             result.put("code", 200);
             result.put("data", isPay);
             result.put("message", "支付成功");
+            session.setAttribute("orderNo",orderNo);
             return result;
         } else {
             result.put("code", 500);

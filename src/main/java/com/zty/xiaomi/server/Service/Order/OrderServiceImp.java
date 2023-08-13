@@ -12,6 +12,7 @@ import com.zty.xiaomi.server.Service.Cart.CartServiceImp;
 import com.zty.xiaomi.server.Service.RegLogin.RegLogServiceImp;
 import com.zty.xiaomi.server.utils.OrderNumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ public class OrderServiceImp implements OrderService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @CacheEvict(value = "cart", allEntries = true)
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 36000, rollbackFor = Exception.class)
     public OrderList creatOrder(OrdCreaParm ordCreaParm) throws Exception {
         OrderList orderList = new OrderList();

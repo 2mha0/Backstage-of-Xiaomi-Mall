@@ -77,3 +77,7 @@ alipay:
   charset: utf-8
   #支付宝网关，这一项是写死的，正式环境是openapi.alipay.com
   gatewayUrl: openapi.alipaydev.com
+
+env:
+  log:
+    path: /Users/zmh/log/xiaomi.log
