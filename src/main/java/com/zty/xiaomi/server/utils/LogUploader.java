@@ -78,16 +78,17 @@ public class LogUploader {
             String[] urls = {
                     "http://localhost:8080/login/UserLogin",//username、password
                     "http://localhost:8080/product/getinfo",//id
-                    "http://localhost:8080/index/category",
-                    "http://localhost:8080/carts/push",//POST：productId、select、token、username
-                    "http://localhost:8080/orders/pay"//orderNo=846530854
+                    "http://localhost:8080/index/category"
             };
+            Random random = new Random();
+            double randomInt = random.nextInt(68) + 1;
             Map<String,Object> arg = new HashMap<>();
-            arg.put("username","zmh");
-            arg.put("password","15023119606");
-            sendHttpRequest(urls[0],proxyHost,arg);
+//            arg.put("username","zmh");
+//            arg.put("password","15023119606");
+            arg.put("id",randomInt+"");
+            sendHttpRequest(urls[1],proxyHost,arg);
 
-            Thread.sleep(7000);
+            Thread.sleep(5000);
         }
     }
 }

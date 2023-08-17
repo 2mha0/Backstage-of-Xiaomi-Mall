@@ -92,7 +92,10 @@ public class LogInterceptor {
         // 将属性注入实体
         logInfo.setRequestId(requestId);
         logInfo.setUrl(url);
-        logInfo.setIp(httpServletRequest.getHeader("X-Forwarded-For"));
+        String ip = httpServletRequest.getHeader("X-Forwarded-For");
+        if (ip == null) {
+            logInfo.setIp(httpServletRequest.getRemoteHost());
+        } else logInfo.setIp(ip);
         logInfo.setReqParam(reqParam);
         logInfo.setTimestamp(timestamp);
 
